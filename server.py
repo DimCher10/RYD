@@ -99,6 +99,28 @@ def init_db():
         ):
             if name not in columns:
                 conn.execute(f"ALTER TABLE tasks ADD COLUMN {name} {definition}")
+        for table in ("topics", "olympiads"):
+            schema = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone()["sql"]
+            if "Искусственный интеллект" not in schema:
+                migrate_subject_table(conn, table)
+
+
+def migrate_subject_table(conn, table):
+    conn.commit()
+    conn.execute("PRAGMA foreign_keys = OFF")
+    extra = "color TEXT NOT NULL DEFAULT '#2563eb'" if table == "topics" else "event_date TEXT, goal TEXT NOT NULL DEFAULT ''"
+    conn.execute(f"""CREATE TABLE {table}_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        subject TEXT NOT NULL CHECK(subject IN ('Математика', 'Информатика', 'Искусственный интеллект')),
+        {extra}, created_at TEXT NOT NULL)""")
+    fields = "id,user_id,name,subject,color,created_at" if table == "topics" else "id,user_id,name,subject,event_date,goal,created_at"
+    conn.execute(f"INSERT INTO {table}_new({fields}) SELECT {fields} FROM {table}")
+    conn.execute(f"DROP TABLE {table}")
+    conn.execute(f"ALTER TABLE {table}_new RENAME TO {table}")
+    conn.commit()
+    conn.execute("PRAGMA foreign_keys = ON")
 
 
 def hash_password(password, salt=None):
@@ -339,7 +361,7 @@ class Handler(BaseHTTPRequestHandler):
     def create_olympiad(self):
         user, data = self.user(), self.body()
         name, subject = str(data.get("name", "")).strip(), data.get("subject")
-        if not name or subject not in ("Математика", "Информатика"):
+        if not name or subject not in ("Математика", "Информатика", "Искусственный интеллект"):
             raise ApiError(400, "Заполните название и предмет")
         with db() as conn:
             cur = conn.execute("INSERT INTO olympiads(user_id,name,subject,event_date,goal,created_at) VALUES(?,?,?,?,?,?)", (user["id"], name[:160], subject, data.get("event_date") or None, str(data.get("goal", ""))[:300], now()))
@@ -349,7 +371,7 @@ class Handler(BaseHTTPRequestHandler):
     def create_topic(self):
         user, data = self.user(), self.body()
         name, subject = str(data.get("name", "")).strip(), data.get("subject")
-        if not name or subject not in ("Математика", "Информатика"):
+        if not name or subject not in ("Математика", "Информатика", "Искусственный интеллект"):
             raise ApiError(400, "Заполните название и предмет")
         color = data.get("color") if str(data.get("color", "")).startswith("#") else "#2563eb"
         with db() as conn:
@@ -441,12 +463,22 @@ class Handler(BaseHTTPRequestHandler):
                 LEFT JOIN tasks t ON t.topic_id=p.id WHERE p.user_id=? GROUP BY p.subject""", (user["id"],))]
             topics = [row_dict(r) for r in conn.execute("""SELECT p.name, p.color, COUNT(t.id) total, SUM(t.status='solved') solved, SUM(t.spent_minutes) spent_minutes FROM topics p
                 LEFT JOIN tasks t ON t.topic_id=p.id WHERE p.user_id=? GROUP BY p.id ORDER BY solved DESC, total DESC LIMIT 6""", (user["id"],))]
+            month_topics = [row_dict(r) for r in conn.execute("""SELECT p.name, p.color, SUM(t.spent_minutes) spent_minutes FROM topics p
+                JOIN tasks t ON t.topic_id=p.id WHERE p.user_id=? AND t.completed_at >= datetime('now','-29 days')
+                GROUP BY p.id HAVING spent_minutes > 0 ORDER BY spent_minutes DESC""", (user["id"],))]
+            day_topics = [row_dict(r) for r in conn.execute("""SELECT p.name, p.color, SUM(t.spent_minutes) spent_minutes FROM topics p
+                JOIN tasks t ON t.topic_id=p.id WHERE p.user_id=? AND date(t.completed_at)=date('now')
+                GROUP BY p.id HAVING spent_minutes > 0 ORDER BY spent_minutes DESC""", (user["id"],))]
         series = []
         today = datetime.now(timezone.utc).date()
         for offset in range(29, -1, -1):
             day = today - timedelta(days=offset)
             series.append({"date": day.isoformat(), "count": days.get(day.isoformat(), 0)})
-        self.json_response({"series": series, "subjects": subjects, "topics": topics})
+        month_minutes = sum(item["spent_minutes"] or 0 for item in month_topics)
+        day_minutes = sum(item["spent_minutes"] or 0 for item in day_topics)
+        self.json_response({"series": series, "subjects": subjects, "topics": topics,
+                            "month_topics": month_topics, "day_topics": day_topics,
+                            "month_minutes": month_minutes, "day_minutes": day_minutes})
 
     def static(self, path):
         relative = "index.html" if path == "/" else path.lstrip("/")

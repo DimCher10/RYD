@@ -9,3 +9,7 @@ details summary{color:var(--blue);font-weight:800;cursor:pointer}
 .notes-list details{background:#f6f8fc;border-radius:9px;padding:9px 11px}
 .note-add{align-self:flex-start;padding:5px 0}
 .form-grid small{font-weight:500;color:var(--muted)}
+.task-actions{display:grid;justify-items:end;gap:9px}
+.time-stats{grid-template-columns:repeat(2,minmax(220px,1fr));max-width:620px}
+.stats-sections{align-items:start}
+@media(max-width:620px){.time-stats{grid-template-columns:1fr 1fr}.time-stats strong{font-size:20px}.task-actions .delete{font-size:10px}}
