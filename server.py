@@ -96,9 +96,12 @@ def init_db():
             ("spent_minutes", "INTEGER NOT NULL DEFAULT 0"),
             ("condition_text", "TEXT NOT NULL DEFAULT ''"),
             ("condition_image", "TEXT"),
+            ("problem_count", "INTEGER NOT NULL DEFAULT 1"),
+            ("solved_count", "INTEGER NOT NULL DEFAULT 0"),
         ):
             if name not in columns:
                 conn.execute(f"ALTER TABLE tasks ADD COLUMN {name} {definition}")
+        conn.execute("UPDATE tasks SET solved_count=1 WHERE status='solved' AND solved_count=0")
         for table in ("topics", "olympiads"):
             schema = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone()["sql"]
             if "Искусственный интеллект" not in schema:
@@ -403,8 +406,9 @@ class Handler(BaseHTTPRequestHandler):
         olympiad_id = int(data["olympiad_id"]) if data.get("olympiad_id") else None
         try:
             planned_minutes = max(0, min(int(data.get("planned_minutes") or 0), 100000))
+            problem_count = max(1, min(int(data.get("problem_count") or 1), 10000))
         except (TypeError, ValueError):
-            raise ApiError(400, "Некорректное плановое время")
+            raise ApiError(400, "Некорректное время или количество задач")
         image = data.get("condition_image") or None
         if image and (not isinstance(image, str) or not image.startswith("data:image/jpeg;base64,") or len(image) > 4_500_000):
             raise ApiError(400, "Фото должно быть в формате JPEG и не больше 3 МБ")
@@ -412,8 +416,8 @@ class Handler(BaseHTTPRequestHandler):
             for table, item_id in (("topics", topic_id), ("olympiads", olympiad_id)):
                 if item_id and not conn.execute(f"SELECT 1 FROM {table} WHERE id=? AND user_id=?", (item_id, user["id"])).fetchone():
                     raise ApiError(400, "Выбрана недоступная связь")
-            cur = conn.execute("""INSERT INTO tasks(user_id,topic_id,olympiad_id,title,description,difficulty,status,due_date,created_at,planned_minutes,condition_text,condition_image)
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""", (user["id"], topic_id, olympiad_id, title[:200], str(data.get("description", ""))[:2000], difficulty, "planned", data.get("due_date") or None, now(), planned_minutes, str(data.get("condition_text", ""))[:10000], image))
+            cur = conn.execute("""INSERT INTO tasks(user_id,topic_id,olympiad_id,title,description,difficulty,status,due_date,created_at,planned_minutes,condition_text,condition_image,problem_count)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""", (user["id"], topic_id, olympiad_id, title[:200], str(data.get("description", ""))[:2000], difficulty, "planned", data.get("due_date") or None, now(), planned_minutes, str(data.get("condition_text", ""))[:10000], image, problem_count))
         self.json_response({"id": cur.lastrowid}, 201)
 
     def update_task(self, item_id):
@@ -424,13 +428,19 @@ class Handler(BaseHTTPRequestHandler):
             raise ApiError(400, "Некорректный статус")
         try:
             spent = max(0, min(int(data.get("spent_minutes") or 0), 100000))
+            solved_count = max(0, int(data.get("solved_count") or 0))
         except (TypeError, ValueError):
-            raise ApiError(400, "Некорректное фактическое время")
+            raise ApiError(400, "Некорректное время или количество решенных задач")
         if status == "solved" and spent <= 0:
             raise ApiError(400, "Укажите время, потраченное на задачу")
         completed = now() if status == "solved" else None
         with db() as conn:
-            cur = conn.execute("UPDATE tasks SET status=?, completed_at=?, spent_minutes=? WHERE id=? AND user_id=?", (status, completed, spent, item_id, user["id"]))
+            task = conn.execute("SELECT problem_count FROM tasks WHERE id=? AND user_id=?", (item_id, user["id"])).fetchone()
+            if not task:
+                raise ApiError(404, "Задача не найдена")
+            if solved_count > task["problem_count"]:
+                raise ApiError(400, "Решенных задач не может быть больше общего количества")
+            cur = conn.execute("UPDATE tasks SET status=?, completed_at=?, spent_minutes=?, solved_count=? WHERE id=? AND user_id=?", (status, completed, spent, solved_count, item_id, user["id"]))
         if not cur.rowcount:
             raise ApiError(404, "Задача не найдена")
         self.json_response({"ok": True})
@@ -447,9 +457,9 @@ class Handler(BaseHTTPRequestHandler):
         user = self.user()
         with db() as conn:
             counts = row_dict(conn.execute("""SELECT COUNT(*) total, SUM(status='solved') solved, SUM(status='in_progress') active,
-                SUM(completed_at >= datetime('now','-30 days')) month_solved, SUM(spent_minutes) spent_minutes FROM tasks WHERE user_id=?""", (user["id"],)).fetchone())
+                SUM(completed_at >= datetime('now','-30 days')) month_solved, SUM(spent_minutes) spent_minutes, SUM(solved_count) solved_problems FROM tasks WHERE user_id=?""", (user["id"],)).fetchone())
             upcoming = [row_dict(r) for r in conn.execute("SELECT * FROM olympiads WHERE user_id=? AND event_date>=date('now') ORDER BY event_date LIMIT 3", (user["id"],))]
-            recent = [row_dict(r) for r in conn.execute("""SELECT t.*, p.name topic_name, p.color FROM tasks t LEFT JOIN topics p ON p.id=t.topic_id
+            recent = [row_dict(r) for r in conn.execute("""SELECT t.*, p.name topic_name, p.color, p.subject FROM tasks t LEFT JOIN topics p ON p.id=t.topic_id
                 WHERE t.user_id=? ORDER BY CASE t.status WHEN 'in_progress' THEN 0 WHEN 'planned' THEN 1 ELSE 2 END, t.created_at DESC LIMIT 5""", (user["id"],))]
         counts = {key: (value or 0) for key, value in counts.items()}
         self.json_response({"counts": counts, "upcoming": upcoming, "tasks": recent})
@@ -463,10 +473,10 @@ class Handler(BaseHTTPRequestHandler):
                 LEFT JOIN tasks t ON t.topic_id=p.id WHERE p.user_id=? GROUP BY p.subject""", (user["id"],))]
             topics = [row_dict(r) for r in conn.execute("""SELECT p.name, p.color, COUNT(t.id) total, SUM(t.status='solved') solved, SUM(t.spent_minutes) spent_minutes FROM topics p
                 LEFT JOIN tasks t ON t.topic_id=p.id WHERE p.user_id=? GROUP BY p.id ORDER BY solved DESC, total DESC LIMIT 6""", (user["id"],))]
-            month_topics = [row_dict(r) for r in conn.execute("""SELECT p.name, p.color, SUM(t.spent_minutes) spent_minutes FROM topics p
+            month_topics = [row_dict(r) for r in conn.execute("""SELECT p.name, p.color, SUM(t.spent_minutes) spent_minutes, SUM(t.solved_count) solved_count FROM topics p
                 JOIN tasks t ON t.topic_id=p.id WHERE p.user_id=? AND t.completed_at >= datetime('now','-29 days')
                 GROUP BY p.id HAVING spent_minutes > 0 ORDER BY spent_minutes DESC""", (user["id"],))]
-            day_topics = [row_dict(r) for r in conn.execute("""SELECT p.name, p.color, SUM(t.spent_minutes) spent_minutes FROM topics p
+            day_topics = [row_dict(r) for r in conn.execute("""SELECT p.name, p.color, SUM(t.spent_minutes) spent_minutes, SUM(t.solved_count) solved_count FROM topics p
                 JOIN tasks t ON t.topic_id=p.id WHERE p.user_id=? AND date(t.completed_at)=date('now')
                 GROUP BY p.id HAVING spent_minutes > 0 ORDER BY spent_minutes DESC""", (user["id"],))]
         series = []
@@ -476,9 +486,16 @@ class Handler(BaseHTTPRequestHandler):
             series.append({"date": day.isoformat(), "count": days.get(day.isoformat(), 0)})
         month_minutes = sum(item["spent_minutes"] or 0 for item in month_topics)
         day_minutes = sum(item["spent_minutes"] or 0 for item in day_topics)
+        month_solved = sum(item["solved_count"] or 0 for item in month_topics)
+        day_solved = sum(item["solved_count"] or 0 for item in day_topics)
+        with db() as conn:
+            lifetime = row_dict(conn.execute("SELECT SUM(spent_minutes) spent_minutes, SUM(solved_count) solved_count FROM tasks WHERE user_id=?", (user["id"],)).fetchone())
         self.json_response({"series": series, "subjects": subjects, "topics": topics,
                             "month_topics": month_topics, "day_topics": day_topics,
-                            "month_minutes": month_minutes, "day_minutes": day_minutes})
+                            "month_minutes": month_minutes, "day_minutes": day_minutes,
+                            "month_solved": month_solved, "day_solved": day_solved,
+                            "lifetime_minutes": lifetime["spent_minutes"] or 0,
+                            "lifetime_solved": lifetime["solved_count"] or 0})
 
     def static(self, path):
         relative = "index.html" if path == "/" else path.lstrip("/")

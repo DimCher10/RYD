@@ -12,4 +12,12 @@ details summary{color:var(--blue);font-weight:800;cursor:pointer}
 .task-actions{display:grid;justify-items:end;gap:9px}
 .time-stats{grid-template-columns:repeat(2,minmax(220px,1fr));max-width:620px}
 .stats-sections{align-items:start}
+.summary-stats{grid-template-columns:repeat(3,minmax(200px,1fr))}
+.summary-stats .stat-card p{margin:7px 0 0;color:var(--muted);font-size:11px;font-weight:700}
+.pie-layout{display:grid;grid-template-columns:180px 1fr;gap:28px;align-items:center;padding:12px 0}
+.pie{width:180px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative}
+.pie:after{content:"";position:absolute;inset:34px;border-radius:50%;background:#fff}
+.pie>div{z-index:1;text-align:center;display:grid}.pie strong{font-size:28px}.pie span{font-size:10px;color:var(--muted)}
+.pie-legend{display:grid;gap:12px}.pie-legend>div{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:8px;font-size:11px}.pie-legend i{width:9px;height:9px;border-radius:50%}.pie-legend b{font-size:10px}
 @media(max-width:620px){.time-stats{grid-template-columns:1fr 1fr}.time-stats strong{font-size:20px}.task-actions .delete{font-size:10px}}
+@media(max-width:620px){.summary-stats{grid-template-columns:1fr}.pie-layout{grid-template-columns:1fr}.pie{margin:auto}}
