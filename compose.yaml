@@ -1,0 +1,11 @@
+services:
+  ryd:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ryd-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ryd-data:
