@@ -1,0 +1,11 @@
+details{margin-top:9px;font-size:11px}
+details summary{color:var(--blue);font-weight:800;cursor:pointer}
+.condition,.note-content{white-space:pre-wrap;line-height:1.6;color:#4f5e75;padding:9px 0}
+.condition-photo{display:flex;align-items:center;gap:9px;margin-top:10px;color:var(--blue);font-size:11px;font-weight:800;text-decoration:none}
+.condition-photo img{width:56px;height:44px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
+.topic-card{min-height:260px}
+.notes-list{display:grid;gap:7px;margin:15px 0}
+.notes-list small{color:var(--muted)}
+.notes-list details{background:#f6f8fc;border-radius:9px;padding:9px 11px}
+.note-add{align-self:flex-start;padding:5px 0}
+.form-grid small{font-weight:500;color:var(--muted)}
