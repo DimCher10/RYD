@@ -9,6 +9,7 @@ details summary{color:var(--blue);font-weight:800;cursor:pointer}
 .notes-list details{background:#f6f8fc;border-radius:9px;padding:9px 11px}
 .note-add{align-self:flex-start;padding:5px 0}
 .form-grid small{font-weight:500;color:var(--muted)}
+.remove-photo{display:flex!important;grid-template-columns:auto 1fr!important;align-items:center;color:#a32d3d}.remove-photo input{width:auto!important}
 .task-actions{display:grid;justify-items:end;gap:9px}
 .time-stats{grid-template-columns:repeat(2,minmax(220px,1fr));max-width:620px}
 .stats-sections{align-items:start}

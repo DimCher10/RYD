@@ -422,6 +422,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def update_task(self, item_id):
         user, data = self.user(), self.body()
+        if "status" not in data:
+            return self.edit_task(user, item_id, data)
         allowed = {"planned", "in_progress", "solved"}
         status = data.get("status")
         if status not in allowed:
@@ -443,6 +445,38 @@ class Handler(BaseHTTPRequestHandler):
             cur = conn.execute("UPDATE tasks SET status=?, completed_at=?, spent_minutes=?, solved_count=? WHERE id=? AND user_id=?", (status, completed, spent, solved_count, item_id, user["id"]))
         if not cur.rowcount:
             raise ApiError(404, "Задача не найдена")
+        self.json_response({"ok": True})
+
+    def edit_task(self, user, item_id, data):
+        title, difficulty = str(data.get("title", "")).strip(), data.get("difficulty")
+        if not title or difficulty not in ("Легко", "Средне", "Сложно"):
+            raise ApiError(400, "Заполните название и сложность")
+        try:
+            topic_id = int(data["topic_id"]) if data.get("topic_id") else None
+            olympiad_id = int(data["olympiad_id"]) if data.get("olympiad_id") else None
+            planned_minutes = max(0, min(int(data.get("planned_minutes") or 0), 100000))
+            problem_count = max(1, min(int(data.get("problem_count") or 1), 10000))
+        except (TypeError, ValueError):
+            raise ApiError(400, "Некорректные связи, время или количество задач")
+        image = data.get("condition_image")
+        if image and (not isinstance(image, str) or not image.startswith("data:image/jpeg;base64,") or len(image) > 4_500_000):
+            raise ApiError(400, "Фото должно быть в формате JPEG и не больше 3 МБ")
+        with db() as conn:
+            current = conn.execute("SELECT solved_count, condition_image FROM tasks WHERE id=? AND user_id=?", (item_id, user["id"])).fetchone()
+            if not current:
+                raise ApiError(404, "Задача не найдена")
+            if current["solved_count"] > problem_count:
+                raise ApiError(400, "Общее количество не может быть меньше уже решенных задач")
+            for table, linked_id in (("topics", topic_id), ("olympiads", olympiad_id)):
+                if linked_id and not conn.execute(f"SELECT 1 FROM {table} WHERE id=? AND user_id=?", (linked_id, user["id"])).fetchone():
+                    raise ApiError(400, "Выбрана недоступная связь")
+            if "condition_image" not in data:
+                image = current["condition_image"]
+            conn.execute("""UPDATE tasks SET topic_id=?, olympiad_id=?, title=?, description=?, difficulty=?, due_date=?,
+                planned_minutes=?, problem_count=?, condition_text=?, condition_image=? WHERE id=? AND user_id=?""",
+                (topic_id, olympiad_id, title[:200], str(data.get("description", ""))[:2000], difficulty,
+                 data.get("due_date") or None, planned_minutes, problem_count, str(data.get("condition_text", ""))[:10000],
+                 image, item_id, user["id"]))
         self.json_response({"ok": True})
 
     def delete_item(self, table, item_id):
