@@ -18,8 +18,33 @@ DB_PATH = Path(os.environ.get("RYD_DB_PATH", ROOT / "data" / "ryd.db"))
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8000"))
 SESSION_DAYS = 30
+STUDY_QUIZ_VERSION = 2
 
 STUDY_QUIZZES = {
+    "module9": [
+        ("Как называется точка, представляющая центр кластера в k-means?", ("центроид", "центр кластера"), "На шаге обновления k-means пересчитывает центроиды."),
+        ("Какую норму использует стандартный k-means: L1 или квадрат L2?", ("l2", "квадрат l2", "евклидову", "евклидово расстояние"), "Функция потерь k-means основана на квадратах евклидовых расстояний."),
+        ("Почему перед k-means обычно масштабируют признаки?", ("чтобы признаки были одного масштаба", "из-за масштаба признаков", "чтобы масштаб не влиял на расстояние"), "Признак с большим масштабом иначе доминирует в расстоянии."),
+        ("Как называется метод инициализации центроидов, используемый sklearn по умолчанию?", ("k-means++", "kmeans++"), "k-means++ разносит начальные центры и обычно улучшает результат."),
+        ("Какое преобразование данных обязательно перед PCA?", ("центрирование", "центрировать", "вычесть среднее"), "PCA применяют к центрированным данным."),
+        ("Что максимизирует первая главная компонента?", ("дисперсию", "variance", "вариацию"), "Первая компонента выбирает направление максимальной дисперсии."),
+        ("Как называются направления главных компонент в терминах ковариационной матрицы?", ("собственные векторы", "собственные вектора"), "Главные направления задаются собственными векторами ковариационной матрицы."),
+        ("Является ли k-means устойчивым к выбросам: да или нет?", ("нет",), "Среднее и квадраты расстояний делают k-means чувствительным к выбросам."),
+        ("Как называется сумма квадратов расстояний объектов до центроидов?", ("inertia", "инерция", "within-cluster sum of squares", "wcss"), "В sklearn эта величина доступна как inertia_."),
+        ("Можно ли напрямую считать номер кластера истинным классом: да или нет?", ("нет",), "Номера кластеров условны, а кластеризация не использует истинные метки."),
+    ],
+    "module10": [
+        ("Как называется вектор из частных производных функции?", ("градиент",), "Градиент указывает направление быстрейшего роста функции."),
+        ("Куда направлен шаг градиентного спуска: по градиенту или против него?", ("против", "против градиента", "в минус градиент"), "Для минимизации двигаются в направлении минус градиента."),
+        ("Что чаще всего происходит при слишком большом learning rate?", ("расходимость", "модель расходится", "перескакивание минимума"), "Шаги могут перескакивать минимум, и оптимизация расходится."),
+        ("Достаточно ли равенства производной нулю, чтобы точка была минимумом: да или нет?", ("нет",), "Это может быть максимум или седловая точка; нужны дополнительные условия."),
+        ("Как называется функция, у которой отрезок между двумя точками лежит не ниже графика?", ("выпуклая", "выпуклая функция"), "Для выпуклой функции локальный минимум является глобальным."),
+        ("Чему равна производная x в квадрате?", ("2x", "2*x"), "По степенному правилу производная x² равна 2x."),
+        ("Как называется параметр размера шага градиентного спуска?", ("learning rate", "скорость обучения", "шаг обучения"), "Learning rate определяет длину шага оптимизации."),
+        ("Какой знак ставят перед learning rate в формуле градиентного спуска?", ("минус", "-"), "Из параметров вычитают learning rate, умноженный на градиент."),
+        ("Как называется производная функции нескольких переменных по одной переменной?", ("частная производная", "частная"), "Градиент состоит из частных производных."),
+        ("Что ищет задача минимизации: аргумент или только значение функции?", ("аргумент", "argmin"), "argmin возвращает точку, в которой достигается минимальное значение."),
+    ],
     "foundation": [
         ("Сколько столбцов будет у произведения матриц размеров 3x4 и 4x2?", ("2",), "Произведение имеет размер 3x2."),
         ("Как называется максимальное число линейно независимых строк или столбцов матрицы?", ("ранг", "rank"), "Это ранг матрицы."),
@@ -92,6 +117,28 @@ STUDY_QUIZZES = {
         ("Как называется ограниченная версия продукта для проверки гипотезы?", ("mvp", "minimum viable product"), "MVP позволяет проверить ценность до сложной реализации."),
         ("Что нужно назвать после результата проекта: только успехи или также ограничения?", ("ограничения", "также ограничения", "limitations"), "Честный рассказ включает ошибки и ограничения решения."),
     ],
+}
+
+COURSE_MODULE_QUIZZES = {
+    11: [("Как расшифровывается EDA?", ("exploratory data analysis", "разведочный анализ данных"), "EDA — разведочный анализ данных."), ("Как называется аномально далекое наблюдение?", ("выброс", "outlier"), "Это выброс."), ("Можно ли заполнять пропуски до разделения данных: да или нет?", ("нет",), "Иначе статистики заполнения могут вызвать утечку.")],
+    12: [("Какой вердикт означает превышение времени?", ("tle",), "TLE — Time Limit Exceeded."), ("Какая сложность у одного прохода по массиву?", ("o(n)", "n", "линейная"), "Один проход имеет линейную сложность."), ("Какая структура хранит пары ключ-значение?", ("словарь", "dict", "hash map", "хеш-таблица"), "Для этого используют словарь или hash map.")],
+    13: [("Какая метрика объединяет precision и recall?", ("f1", "f1-score"), "F1 является их гармоническим средним."), ("Какая метрика регрессии измеряется в единицах целевой переменной: MSE или RMSE?", ("rmse",), "После извлечения корня RMSE возвращается к исходным единицам."), ("Как называется доля найденных положительных объектов?", ("recall", "полнота"), "Это recall.")],
+    14: [("Чему равен скалярный продукт ортогональных векторов?", ("0", "нулю"), "Он равен нулю."), ("Как называется длина вектора?", ("норма",), "Длину вектора задает норма."), ("Как называется максимальное число линейно независимых строк матрицы?", ("ранг",), "Это ранг матрицы.")],
+    15: [("Как называется попадание test-информации в обучение?", ("утечка", "leakage", "data leakage"), "Это утечка данных."), ("Какой split сохраняет доли классов?", ("stratified", "стратифицированный"), "Используют stratified split."), ("Можно ли выбирать модель по test: да или нет?", ("нет",), "Модель выбирают по validation.")],
+    16: [("Какая сложность у бинарного поиска?", ("o(log n)", "log n", "логарифмическая"), "Диапазон делится пополам."), ("Должны ли данные быть упорядочены для обычного бинарного поиска?", ("да",), "Обычный бинарный поиск требует монотонного порядка."), ("Как называется поиск минимального подходящего значения через монотонный предикат?", ("бинарный поиск по ответу",), "Это бинарный поиск по ответу.")],
+    17: [("Как называется простая модель для сравнения?", ("baseline", "бейслайн"), "Сначала фиксируют baseline."), ("Какой объект sklearn объединяет preprocessing и модель?", ("pipeline", "пайплайн"), "Pipeline предотвращает утечки преобразований."), ("На какой выборке подбирают гиперпараметры?", ("validation", "валидационной", "валидация"), "Не на test.")],
+    18: [("Как называется сохранение ответов подзадач?", ("мемоизация", "memoization"), "Мемоизация исключает повторные вычисления."), ("Какая техника хранит суммы первых k элементов?", ("префиксные суммы", "prefix sums"), "Это префиксные суммы."), ("Сколько индексов двигает техника two pointers?", ("2", "два"), "Она использует два указателя.")],
+    19: [("Какой метод PyTorch вычисляет градиенты?", ("backward", "backward()"), "Вызывают loss.backward()."), ("Что делает optimizer.step()?", ("обновляет веса", "обновляет параметры"), "Он применяет градиенты к параметрам."), ("Как называется нелинейная функция между слоями?", ("функция активации", "activation"), "Без активаций сеть остается линейной.")],
+    20: [("Какой обход графа использует очередь?", ("bfs", "поиск в ширину"), "BFS использует очередь."), ("Какой обход обычно реализуют рекурсией или стеком?", ("dfs", "поиск в глубину"), "DFS идет в глубину."), ("Как называется список соседей каждой вершины?", ("список смежности",), "Это список смежности.")],
+    21: [("Как называется операция с ядром по изображению?", ("свертка", "convolution"), "Это свертка."), ("Как называется дообучение готовой модели?", ("fine-tuning", "файнтюнинг"), "Это fine-tuning."), ("Какой слой уменьшает пространственный размер карты признаков?", ("pooling", "пулинг"), "Pooling агрегирует локальные области.")],
+    22: [("Какой алгоритм ищет кратчайшие пути при неотрицательных весах?", ("дейкстра", "dijkstra"), "Это алгоритм Дейкстры."), ("Какой алгоритм находит пути между всеми парами вершин?", ("флойд-уоршелл", "флойд", "floyd-warshall"), "Это Floyd–Warshall."), ("Как называется расстояние по числу вставок, удалений и замен?", ("расстояние левенштейна", "левенштейн"), "Это расстояние Левенштейна.")],
+    23: [("Из каких двух частей состоит автоэнкодер?", ("энкодер и декодер", "encoder decoder", "encoder и decoder"), "Encoder сжимает, decoder восстанавливает."), ("Что является целевой переменной обычного автоэнкодера?", ("вход", "исходные данные", "x"), "Модель восстанавливает собственный вход."), ("Как называется сжатое представление между encoder и decoder?", ("латентное представление", "latent", "латентный вектор"), "Это latent representation.")],
+    24: [("Сколько подмножеств у множества из n элементов?", ("2^n", "2 в степени n"), "Каждый элемент включается или нет."), ("Как называется представление подмножества целым числом?", ("битовая маска", "bitmask"), "Это битовая маска."), ("На сколько частей делит диапазон тернарный поиск?", ("3", "три"), "Он сравнивает две точки и отбрасывает одну из трех частей.")],
+    25: [("Как называется разбиение текста на элементы словаря?", ("токенизация",), "Это токенизация."), ("Какая модель признаков использует частоту слова и обратную частоту документа?", ("tf-idf", "tfidf"), "Это TF-IDF."), ("Как называется плотный вектор слова?", ("эмбеддинг", "embedding"), "Это embedding.")],
+    26: [("Как называется вероятностный метод со случайными испытаниями?", ("монте-карло", "monte carlo"), "Это Monte Carlo."), ("Как называется оптимизация с постепенным снижением температуры?", ("имитация отжига", "simulated annealing", "отжиг"), "Это simulated annealing."), ("Как называется поиск, сохраняющий ограниченное число лучших кандидатов?", ("beam search", "лучевой поиск"), "Это beam search.")],
+    27: [("Какие сети обрабатывают последовательность рекуррентно?", ("rnn", "рекуррентные нейронные сети"), "Это RNN."), ("Какие три матрицы используются в attention?", ("q k v", "q, k, v", "query key value"), "Это Query, Key и Value."), ("Как называется предсказание следующего токена?", ("языковое моделирование", "language modeling"), "Это задача language modeling.")],
+    28: [("К какому типу относится BERT: encoder или decoder?", ("encoder", "энкодер"), "BERT — encoder-like модель."), ("Что запрещает смотреть на будущие токены?", ("causal mask", "каузальная маска"), "Causal mask используется в decoder."), ("Как называется механизм связей всех токенов друг с другом?", ("self-attention", "самовнимание"), "Это self-attention.")],
+    29: [("Как расшифровывается ViT?", ("vision transformer",), "ViT — Vision Transformer."), ("Какая модель связывает изображения и текст в общем пространстве?", ("clip",), "Это CLIP."), ("Как называется постепенное удаление шума при генерации изображения?", ("обратная диффузия", "denoising", "денойзинг"), "Диффузионная модель учится обращать процесс зашумления.")],
 }
 
 
@@ -187,6 +234,8 @@ def init_db():
         if "drills_completed" not in plan_columns:
             conn.execute("ALTER TABLE study_plan_progress ADD COLUMN drills_completed INTEGER NOT NULL DEFAULT 0")
             conn.execute("UPDATE study_plan_progress SET drills_completed=7 WHERE completed=1")
+        if "quiz_version" not in plan_columns:
+            conn.execute("ALTER TABLE study_plan_progress ADD COLUMN quiz_version INTEGER NOT NULL DEFAULT 0")
         conn.execute("UPDATE tasks SET solved_count=1 WHERE status='solved' AND solved_count=0")
         for table in ("topics", "olympiads"):
             schema = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone()["sql"]
@@ -765,18 +814,39 @@ class Handler(BaseHTTPRequestHandler):
                 ("Расскажи о проекте за 5 минут, затем за 90 секунд.", "Ответь на пять неудобных вопросов об ограничениях.", "Рассказ конкретен: данные, baseline, эксперимент, результат."),
                 ("Повтори только три слабые темы, не открывая новых.", "Кратко объясни каждую тему перед сном.", "Подготовка завершена вовремя, сохранен нормальный режим сна."),
             ]
-        quiz_key = self.study_quiz_key(day)
-        quiz_bank = STUDY_QUIZZES[quiz_key]
+        exact_titles = {
+            date_type(2026, 7, 13): "K-means: алгоритм, масштабирование и реализация через NumPy",
+            date_type(2026, 7, 14): "PCA: центрирование, ковариация и собственная реализация",
+            date_type(2026, 7, 15): "Завершить домашнюю работу и разбор модуля 9",
+            date_type(2026, 7, 16): "Дополнительно: закрыть пробелы модуля 8 по линейной алгебре",
+            date_type(2026, 7, 17): "Алгоритмы: массивы, строки, словари и сложность",
+            date_type(2026, 7, 18): "Мини-проект: scaling, PCA и k-means на датасете",
+            date_type(2026, 7, 19): "Контрольный тест по модулям 3–9 и работа над ошибками",
+            date_type(2026, 7, 20): "Функции, производные и геометрический смысл градиента",
+            date_type(2026, 7, 21): "Выпуклые функции и условия минимума",
+            date_type(2026, 7, 22): "Градиентный спуск и влияние learning rate",
+            date_type(2026, 7, 23): "Неравенства, норма вектора и скалярное произведение",
+            date_type(2026, 7, 24): "Алгоритмические задачи и первые SQL-запросы",
+            date_type(2026, 7, 25): "Домашняя работа модуля 10 и численная проверка градиентов",
+            date_type(2026, 7, 26): "Устный контроль по оптимизации и повтор слабых мест",
+        }
+        module = self.course_module(day)
+        if module:
+            lesson = ("Семинар", "Домашняя работа", "Разбор и работа над ошибками")[module[2] - 1]
+            phase = f"Модуль {module[0]}. {module[1]} · день {module[2]} из 3"
+            title = exact_titles.get(day, f"{lesson}: модуль {module[0]}")
+        else:
+            phase = "Дополнительная подготовка по программе"
+            title = exact_titles.get(day, tasks[weekday])
+        quiz_bank = self.quiz_bank(day)
         quiz_start = day.toordinal() % len(quiz_bank)
         quiz_items = [quiz_bank[(quiz_start + offset) % len(quiz_bank)] for offset in range(3)]
         drill_names = ("Быстрый вопрос", "Проверка понимания", "Контрольный вопрос")
-        return {"date": day.isoformat(), "phase": phase, "title": tasks[weekday], "weekday": weekday,
+        return {"date": day.isoformat(), "phase": phase, "title": title, "weekday": weekday,
                 "drills": [{"id": index, "name": drill_names[index], "text": item[0]}
                            for index, item in enumerate(quiz_items)]}
 
     def study_quiz_key(self, day):
-        if day <= date_type(2026, 7, 31):
-            return "foundation"
         if day <= date_type(2026, 8, 31):
             return "validation"
         if day <= date_type(2026, 10, 31):
@@ -786,6 +856,62 @@ class Handler(BaseHTTPRequestHandler):
         if day <= date_type(2027, 2, 28):
             return "applied"
         return "interview"
+
+    def course_module(self, day):
+        modules = [
+            (date_type(2026, 7, 13), 9, "ML. Кластеризация и методы понижения размерности"),
+            (date_type(2026, 7, 20), 10, "Математика. Функции, неравенства и оптимизация"),
+            (date_type(2026, 8, 3), 11, "ML. Exploratory Data Analysis"),
+            (date_type(2026, 8, 10), 12, "Программирование. Введение в олимпиадное программирование"),
+            (date_type(2026, 8, 17), 13, "ML. Метрики"),
+            (date_type(2026, 8, 24), 14, "Математика. Дополнительные инструменты математики"),
+            (date_type(2026, 8, 29), 15, "ML. Валидация"),
+            (date_type(2026, 9, 1), 16, "Программирование. Бинарный поиск"),
+            (date_type(2026, 9, 8), 17, "ML. Модели"),
+            (date_type(2026, 9, 15), 18, "Программирование. Введение в динамическое программирование"),
+            (date_type(2026, 9, 22), 19, "ML. Полносвязные нейросети"),
+            (date_type(2026, 10, 1), 20, "Программирование. Графы"),
+            (date_type(2026, 10, 8), 21, "ML. Сверточные нейросети"),
+            (date_type(2026, 10, 15), 22, "Программирование. Кратчайшие пути и продолжение динамики"),
+            (date_type(2026, 10, 22), 23, "ML. Автоэнкодеры"),
+            (date_type(2026, 11, 2), 24, "Программирование. Тернарный поиск и переборы"),
+            (date_type(2026, 11, 9), 25, "ML. Работа с текстами"),
+            (date_type(2026, 11, 16), 26, "Программирование. Методы оптимизации"),
+            (date_type(2026, 11, 23), 27, "ML. Языковое моделирование и механизм внимания"),
+            (date_type(2026, 12, 1), 28, "ML. Трансформеры для текстов"),
+            (date_type(2026, 12, 8), 29, "ML. Мультимодальные трансформеры и диффузии"),
+        ]
+        for start, number, title in modules:
+            if start <= day <= start + timedelta(days=2):
+                return number, title, (day - start).days + 1
+        return None
+
+    def quiz_bank(self, day):
+        module = self.course_module(day)
+        if module:
+            if module[0] == 9:
+                return STUDY_QUIZZES["module9"]
+            if module[0] == 10:
+                return STUDY_QUIZZES["module10"]
+            return COURSE_MODULE_QUIZZES[module[0]]
+        july_extra = {
+            16: STUDY_QUIZZES["foundation"],
+            17: STUDY_QUIZZES["models"],
+            18: STUDY_QUIZZES["module9"],
+            19: STUDY_QUIZZES["module9"],
+            23: STUDY_QUIZZES["module10"],
+            24: STUDY_QUIZZES["models"],
+            25: STUDY_QUIZZES["module10"],
+            26: STUDY_QUIZZES["module10"],
+            27: STUDY_QUIZZES["module10"],
+            28: STUDY_QUIZZES["module10"],
+            29: STUDY_QUIZZES["module10"],
+            30: STUDY_QUIZZES["module10"],
+            31: STUDY_QUIZZES["module10"],
+        }
+        if day.year == 2026 and day.month == 7 and day.day in july_extra:
+            return july_extra[day.day]
+        return STUDY_QUIZZES[self.study_quiz_key(day)]
 
     def study_day_details(self, day):
         month_plans = {
@@ -803,7 +929,23 @@ class Handler(BaseHTTPRequestHandler):
             (2027, 6): ("День отбора", ["Короткое повторение и спокойный режим"]),
         }
         stage, topics = month_plans[(day.year, day.month)]
-        topic = topics[min((day.day - 1) // 7, len(topics) - 1)]
+        module = self.course_module(day)
+        if module:
+            stage = f"Модуль {module[0]} курса · день {module[2]} из 3"
+            topic = f"{module[0]}. {module[1]}"
+        else:
+            stage = "Дополнительная подготовка"
+            topic = topics[min((day.day - 1) // 7, len(topics) - 1)]
+            if day in {
+                date_type(2026, 7, 16), date_type(2026, 7, 17), date_type(2026, 7, 18), date_type(2026, 7, 19),
+                date_type(2026, 7, 23), date_type(2026, 7, 24), date_type(2026, 7, 25), date_type(2026, 7, 26),
+            }:
+                topic = {
+                    16: "Повтор модуля 8. Линейная алгебра", 17: "Алгоритмы: массивы, строки и словари",
+                    18: "Мини-проект по модулю 9", 19: "Контроль модулей 3–9",
+                    23: "Закрепление математики модуля 10", 24: "Алгоритмы и начало SQL",
+                    25: "Практика оптимизации", 26: "Контроль модуля 10",
+                }[day.day]
         course_period = day <= date_type(2026, 12, 31)
         weekday = day.weekday()
         if course_period:
@@ -826,7 +968,34 @@ class Handler(BaseHTTPRequestHandler):
                 [(30, "План эксперимента", "Запиши гипотезу, одну изменяемую величину и критерий успеха."), (150, "Главный проект", f"Реализуй следующий законченный шаг проекта: {topic.lower()}."), (40, "Тесты и воспроизводимость", "Запусти проект с нуля, обнови таблицу экспериментов и README."), (20, "Итоги", "Зафиксируй результат, неудачи и следующий эксперимент.")],
                 [(45, "Mock interview", "Проведи устную симуляцию: ML, проект и один уточняющий вопрос."), (30, "Разбор записи", "Выпиши неточные, длинные и неподтвержденные ответы."), (30, "Повтор слабых мест", "Переформулируй три худших ответа и повтори их без подсказок."), (15, "Планирование", "Назначь задачи и измеримый результат следующей недели.")],
             ]
+        july_schedules = {
+            date_type(2026, 7, 13): [(35, "Теория k-means", "Повтори шаги assign/update, функцию потерь, критерий остановки и зависимость от инициализации."), (25, "Масштаб признаков", "На четырех точках вручную сравни расстояния до и после StandardScaler."), (50, "Реализация NumPy", "Напиши k-means без sklearn: инициализация, назначение кластеров, пересчет центроидов и остановка."), (10, "Проверка", "Ответь на три вопроса по модулю 9 ниже.")],
+            date_type(2026, 7, 14): [(35, "Теория PCA", "Разбери центрирование, ковариационную матрицу, собственные значения и собственные векторы."), (45, "PCA через NumPy", "Реализуй центрирование, вычисление компонент и проекцию на первые две компоненты."), (30, "Сравнение со sklearn", "Сравни результат со sklearn PCA с учетом возможной смены знака компонент."), (10, "Проверка", "Закрой вопросы по PCA.")],
+            date_type(2026, 7, 15): [(55, "Домашняя работа модуля 9", "Заверши собственное решение до просмотра официального разбора."), (35, "Официальный разбор", "Сравни решения и выпиши все различия: идея, код, проверки и интерпретация."), (20, "Повтор без подсказок", "Воспроизведи самый сложный фрагмент в чистом файле."), (10, "Проверка", "Ответь на вопросы по кластеризации и PCA.")],
+            date_type(2026, 7, 16): [(35, "Матричные операции", "Повтори умножение, транспонирование и смысл размеров матриц."), (35, "Ранг и линейная зависимость", "Реши задачи на ранг, базис и зависимые векторы."), (40, "Практика", "Реши 5–7 коротких задач из домашней работы модуля 8 заново."), (10, "Связь с PCA", "Объясни, зачем PCA собственные векторы и ранг.")],
+            date_type(2026, 7, 17): [(20, "Сложность", "Повтори O(1), O(n), O(n log n) и O(n²) на коротких фрагментах кода."), (75, "Две задачи", "Реши две задачи на массивы, строки или словари без подсказок."), (25, "Проверка", "Добавь граничные тесты и объясни сложность каждого решения.")],
+            date_type(2026, 7, 18): [(30, "Постановка", "Выбери небольшой числовой датасет и опиши, что могут означать кластеры."), (45, "Подготовка данных", "Исследуй пропуски, выбери признаки и выполни масштабирование."), (70, "PCA и k-means", "Построй Pipeline, выбери число кластеров и сохрани метрики."), (45, "Визуализация", "Покажи объекты в пространстве двух главных компонент и центроиды."), (35, "Анализ", "Объясни, полезны ли кластеры, и перечисли ограничения."), (15, "Проверка", "Закрой вопросы модуля 9.")],
+            date_type(2026, 7, 19): [(45, "Контрольный тест", "Ответь без конспекта на 10 вопросов по модулям 3–9."), (35, "Список пробелов", "Раздели ошибки на математику, ML, код и интерпретацию."), (30, "Повтор", "Перерешай две ошибки с наибольшим риском для следующих тем."), (10, "План", "Зафиксируй готовность перейти к модулю 10.")],
+            date_type(2026, 7, 20): [(45, "Функции и производные", "Открой семинар модуля 10 и повтори функции одной и нескольких переменных."), (35, "Частные производные", "Реши 4 коротких задачи на производные и частные производные."), (30, "Градиент", "Нарисуй линии уровня и объясни направление градиента."), (10, "Проверка", "Ответь на вопросы модуля 10.")],
+            date_type(2026, 7, 21): [(40, "Выпуклость", "Разбери определение выпуклой функции и связь локального и глобального минимума."), (40, "Условия экстремума", "Реши задачи, где нулевая производная дает минимум, максимум или седловую точку."), (30, "Визуализация", "Построй графики трех функций и отметь стационарные точки."), (10, "Проверка", "Закрой вопросы по минимумам.")],
+            date_type(2026, 7, 22): [(35, "Алгоритм", "Выведи шаг градиентного спуска и критерии остановки."), (55, "Линейная регрессия", "Реализуй MSE и градиентный спуск через NumPy без sklearn."), (20, "Learning rate", "Сравни три размера шага и объясни сходимость или расходимость."), (10, "Проверка", "Ответь на вопросы по оптимизации.")],
+            date_type(2026, 7, 23): [(40, "Неравенства", "Реши задачи модуля 10 на функции и неравенства."), (35, "Норма и скалярное произведение", "Повтори формулы и геометрический смысл на трех задачах."), (35, "Связь с ML", "Покажи, где норма и скалярное произведение возникают в расстояниях и линейных моделях."), (10, "Проверка", "Пройди контрольные вопросы.")],
+            date_type(2026, 7, 24): [(55, "Алгоритмы", "Реши две задачи без подсказок и укажи сложность."), (45, "SQL", "В SQLBolt выполни три запроса SELECT/WHERE/ORDER BY."), (20, "Разбор", "Проверь граничные случаи алгоритмов и результат SQL вручную.")],
+            date_type(2026, 7, 25): [(90, "Домашняя работа модуля 10", "Реши задания самостоятельно и зафиксируй места затруднений."), (55, "Численная проверка градиентов", "Сравни аналитический градиент с конечными разностями."), (55, "Графики сходимости", "Построй loss curve для трех learning rate."), (25, "Разбор ошибок", "Сравни с официальным разбором только после своей попытки."), (15, "Проверка", "Закрой вопросы модуля 10.")],
+            date_type(2026, 7, 26): [(35, "Устный ответ", "Без конспекта объясни градиент, выпуклость, learning rate и условия минимума."), (35, "Слабые задачи", "Перерешай две математические задачи, где ранее ошибся."), (30, "Повтор реализации", "Воспроизведи формулы градиента линейной регрессии."), (20, "План модуля 11", "Проверь результаты модуля 10 и назначь дату начала EDA.")],
+        }
+        if day in july_schedules:
+            schedules[weekday] = july_schedules[day]
+        if module and day not in july_schedules:
+            module_schedules = {
+                1: [(105, "Семинар курса", f"Открой «{module[0]}. {module[1]}» и пройди семинар последовательно, повторяя вычисления и код."), (15, "Краткий конспект", "Запиши идею темы, ключевые определения, ограничения и один пример применения.")],
+                2: [(100, "Самостоятельная домашняя работа", f"Решай домашнюю работу модуля {module[0]} без официального разбора. Если в курсе указано 3 часа, оставшиеся задачи заверши в дополнительное время."), (20, "Диагностика", "Зафиксируй нерешенные пункты и точную причину каждого затруднения.")],
+                3: [(45, "Завершение своей попытки", "Доведи решения до проверяемого результата до открытия разбора."), (45, "Официальный разбор", "Сравни ход решения, код и проверки. Выпиши причины ошибок."), (20, "Повтор без подсказок", "Воспроизведи самый сложный фрагмент самостоятельно."), (10, "Контроль", "Ответь на три вопроса по этому модулю ниже.")],
+            }
+            schedules[weekday] = module_schedules[module[2]]
         resource_sets = {
+            "module9": [("Курс ВсОШ по ИИ", "Открой модуль 9 «ML. Кластеризация и методы понижения размерности»: семинар, домашняя работа или разбор по блоку дня.", ""), ("Кластеризация sklearn", "KMeans, выбор числа кластеров и примеры.", "https://scikit-learn.org/stable/modules/clustering.html"), ("PCA в sklearn", "Описание PCA, центрирования и примеры кода.", "https://scikit-learn.org/stable/modules/decomposition.html#pca")],
+            "module10": [("Курс ВсОШ по ИИ", "Открой модуль 10 «Математика. Функции, неравенства и оптимизация»: семинар, домашняя работа или разбор по блоку дня.", ""), ("Производные и градиент", "Наглядное объяснение производных и градиентного спуска.", "https://www.3blue1brown.com/lessons/gradient-descent"), ("Оптимизация", "Базовые идеи оптимизации и функции потерь в ML.", "https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent")],
             "foundation": [("Курс ВсОШ по ИИ", "Используй семинар, домашнюю работу и официальный разбор текущего модуля.", ""), ("Матрицы и PCA", "Интерактивное объяснение линейной алгебры и PCA.", "https://www.3blue1brown.com/topics/linear-algebra"), ("Документация sklearn", "KMeans, PCA и примеры использования.", "https://scikit-learn.org/stable/modules/clustering.html")],
             "validation": [("Курс ВсОШ по ИИ", "Модули 11–15: EDA, метрики и валидация.", ""), ("Валидация sklearn", "Cross-validation, split и типичные ошибки.", "https://scikit-learn.org/stable/modules/cross_validation.html"), ("Метрики sklearn", "Определения и примеры метрик моделей.", "https://scikit-learn.org/stable/modules/model_evaluation.html")],
             "models": [("Курс ВсОШ по ИИ", "Модули 16–23 и их домашние работы.", ""), ("PyTorch Tutorials", "Официальные руководства по training loop и моделям.", "https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html"), ("Визуализатор алгоритмов", "Интерактивное повторение поиска, графов и структур данных.", "https://visualgo.net/en")],
@@ -834,11 +1003,44 @@ class Handler(BaseHTTPRequestHandler):
             "applied": [("Google ML Crash Course", "Короткое повторение классического ML и практических решений.", "https://developers.google.com/machine-learning/crash-course"), ("SQLBolt", "Интерактивные SQL-упражнения прямо в браузере.", "https://sqlbolt.com/"), ("Hugging Face Course", "Embeddings, NLP и работа с готовыми моделями.", "https://huggingface.co/learn/nlp-course/chapter1/1")],
             "interview": [("ML System Design", "Базовые компоненты production ML-систем.", "https://developers.google.com/machine-learning/managing-ml-projects"), ("NeetCode Roadmap", "Подборка алгоритмических задач по темам.", "https://neetcode.io/roadmap"), ("SQLBolt", "Быстрая практика SQL перед интервью.", "https://sqlbolt.com/")],
         }
+        resource_key = self.study_quiz_key(day)
+        if module and module[0] in (9, 10):
+            resource_key = f"module{module[0]}"
+        if not module and day.year == 2026 and day.month == 7:
+            resource_key = {
+                16: "foundation", 17: "models", 18: "module9", 19: "module9",
+                23: "module10", 24: "models", 25: "module10", 26: "module10",
+                27: "module10", 28: "module10", 29: "module10", 30: "module10", 31: "module10",
+            }.get(day.day, resource_key)
+        resources = resource_sets[resource_key]
+        if module and module[0] not in (9, 10):
+            module_resources = {
+                11: [("Pandas User Guide", "Пропуски, группировки и исследование табличных данных.", "https://pandas.pydata.org/docs/user_guide/index.html"), ("Seaborn Tutorial", "Графики распределений, связей и категориальных признаков.", "https://seaborn.pydata.org/tutorial.html")],
+                12: [("Визуализатор алгоритмов", "Структуры данных, сортировки и пошаговое выполнение.", "https://visualgo.net/en"), ("Python: сложность операций", "Оценка операций стандартных структур Python.", "https://wiki.python.org/moin/TimeComplexity")],
+                13: [("Метрики sklearn", "Формулы и примеры метрик классификации и регрессии.", "https://scikit-learn.org/stable/modules/model_evaluation.html"), ("Precision и recall", "Наглядное объяснение ошибок классификации.", "https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall")],
+                14: [("Линейная алгебра", "Наглядные векторы, матрицы и линейные преобразования.", "https://www.3blue1brown.com/topics/linear-algebra"), ("Calculus", "Производные, градиенты и математическая интуиция.", "https://www.3blue1brown.com/topics/calculus")],
+                15: [("Валидация sklearn", "Cross-validation и выбор схемы разбиения.", "https://scikit-learn.org/stable/modules/cross_validation.html"), ("Pipeline sklearn", "Как выполнять preprocessing без утечки.", "https://scikit-learn.org/stable/modules/compose.html#pipeline")],
+                16: [("Бинарный поиск", "Теория и шаблоны бинарного поиска.", "https://cp-algorithms.com/num_methods/binary_search.html"), ("Практика binary search", "Задачи по теме на LeetCode.", "https://leetcode.com/tag/binary-search/")],
+                17: [("Pipeline sklearn", "Генерация признаков и корректный pipeline.", "https://scikit-learn.org/stable/modules/compose.html"), ("Подбор параметров", "Grid search и randomized search.", "https://scikit-learn.org/stable/modules/grid_search.html")],
+                18: [("Динамическое программирование", "Базовые идеи и задачи DP.", "https://cp-algorithms.com/dynamic_programming/intro-to-dp.html"), ("Префиксные суммы", "Техника prefix sum и примеры.", "https://usaco.guide/silver/prefix-sums")],
+                19: [("PyTorch Quickstart", "Датасеты, модель, loss и optimizer.", "https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html"), ("Backpropagation", "Наглядное устройство градиентов в нейросети.", "https://www.3blue1brown.com/lessons/backpropagation-calculus")],
+                20: [("Графы", "Хранение графа, DFS и BFS.", "https://cp-algorithms.com/graph/breadth-first-search.html"), ("Визуализатор графов", "Пошаговые обходы графов.", "https://visualgo.net/en/dfsbfs")],
+                21: [("Transfer Learning", "Официальный tutorial PyTorch по transfer learning.", "https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html"), ("CNN Explainer", "Интерактивная визуализация сверточной сети.", "https://poloclub.github.io/cnn-explainer/")],
+                22: [("Алгоритм Дейкстры", "Кратчайшие пути от одной вершины.", "https://cp-algorithms.com/graph/dijkstra.html"), ("Floyd-Warshall", "Кратчайшие пути между всеми парами.", "https://cp-algorithms.com/graph/all-pair-shortest-path-floyd-warshall.html")],
+                23: [("Автоэнкодеры", "Практический tutorial по автоэнкодерам.", "https://docs.pytorch.org/tutorials/beginner/introyt/autoencodertytutorial.html"), ("Neural Networks", "Повтор устройства нейросетей и latent representations.", "https://www.3blue1brown.com/topics/neural-networks")],
+                24: [("Тернарный поиск", "Поиск экстремума унимодальной функции.", "https://cp-algorithms.com/num_methods/ternary_search.html"), ("Подмаски", "Перебор масок и подмасок.", "https://cp-algorithms.com/algebra/all-submasks.html")],
+                25: [("Hugging Face NLP Course", "Токенизация и обработка текстов.", "https://huggingface.co/learn/nlp-course/chapter2/4"), ("Text sklearn", "TF-IDF и baseline классификации текста.", "https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html")],
+                26: [("Методы оптимизации", "Практические эвристики и задачи оптимизации.", "https://cp-algorithms.com/num_methods/simulated_annealing.html"), ("Beam Search", "Принцип лучевого поиска на последовательностях.", "https://huggingface.co/blog/how-to-generate")],
+                27: [("Illustrated Attention", "RNN, перевод и механизм внимания.", "https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/"), ("Sequence Models", "Практика sequence models в PyTorch.", "https://pytorch.org/tutorials/beginner/nlp/sequence_models_tutorial.html")],
+                28: [("Illustrated Transformer", "Self-attention, encoder и decoder.", "https://jalammar.github.io/illustrated-transformer/"), ("Hugging Face Transformers", "BERT, fine-tuning и готовые модели.", "https://huggingface.co/learn/nlp-course/chapter1/4")],
+                29: [("Illustrated Stable Diffusion", "Устройство diffusion-моделей.", "https://jalammar.github.io/illustrated-stable-diffusion/"), ("CLIP", "Описание мультимодальной модели CLIP.", "https://openai.com/index/clip/")],
+            }
+            resources = [(f"Курс ВсОШ по ИИ · модуль {module[0]}", f"Открой «{module[0]}. {module[1]}» и выбери урок текущего дня: семинар, домашняя работа или разбор.", ""), *module_resources[module[0]]]
         blocks = [{"minutes": minutes, "title": title, "description": description}
                   for minutes, title, description in schedules[weekday]]
         return {"stage": stage, "topic": topic, "total_minutes": sum(block["minutes"] for block in blocks),
                 "blocks": blocks, "resources": [{"title": title, "description": description, "url": url}
-                                                 for title, description, url in resource_sets[self.study_quiz_key(day)]]}
+                                                 for title, description, url in resources]}
 
     def check_plan_answer(self):
         user, data = self.user(), self.body()
@@ -853,20 +1055,22 @@ class Handler(BaseHTTPRequestHandler):
         answer = " ".join(str(data.get("answer", "")).strip().lower().replace("ё", "е").split())
         if not answer or len(answer) > 200:
             raise ApiError(400, "Введите короткий ответ")
-        quiz_bank = STUDY_QUIZZES[self.study_quiz_key(day)]
+        quiz_bank = self.quiz_bank(day)
         question = quiz_bank[(day.toordinal() % len(quiz_bank) + drill_id) % len(quiz_bank)]
         accepted = {" ".join(value.lower().replace("ё", "е").split()) for value in question[1]}
         correct = answer in accepted
         with db() as conn:
-            saved = conn.execute("SELECT completed, drills_completed FROM study_plan_progress WHERE user_id=? AND plan_date=?",
+            saved = conn.execute("SELECT completed, drills_completed, quiz_version FROM study_plan_progress WHERE user_id=? AND plan_date=?",
                                  (user["id"], day.isoformat())).fetchone()
-            completed = bool(saved["completed"]) if saved else False
-            mask = saved["drills_completed"] if saved else 0
+            current = saved and saved["quiz_version"] == STUDY_QUIZ_VERSION
+            completed = bool(saved["completed"]) if current else False
+            mask = saved["drills_completed"] if current else 0
             if correct:
                 mask |= 1 << drill_id
-            conn.execute("""INSERT INTO study_plan_progress(user_id,plan_date,completed,drills_completed,updated_at)
-                VALUES(?,?,?,?,?) ON CONFLICT(user_id,plan_date) DO UPDATE SET drills_completed=excluded.drills_completed,
-                updated_at=excluded.updated_at""", (user["id"], day.isoformat(), int(completed), mask, now()))
+            conn.execute("""INSERT INTO study_plan_progress(user_id,plan_date,completed,drills_completed,quiz_version,updated_at)
+                VALUES(?,?,?,?,?,?) ON CONFLICT(user_id,plan_date) DO UPDATE SET completed=excluded.completed,
+                drills_completed=excluded.drills_completed, quiz_version=excluded.quiz_version, updated_at=excluded.updated_at""",
+                (user["id"], day.isoformat(), int(completed), mask, STUDY_QUIZ_VERSION, now()))
         self.json_response({"correct": correct, "drills_completed": mask,
                             "explanation": question[2] if correct else "Ответ не совпал. Проверь термин или вычисление и попробуй еще раз."})
 
@@ -876,15 +1080,16 @@ class Handler(BaseHTTPRequestHandler):
         end = date_type(2027, 6, 1)
         with db() as conn:
             progress = {r["plan_date"]: r for r in conn.execute(
-                "SELECT plan_date, completed, drills_completed FROM study_plan_progress WHERE user_id=?", (user["id"],))}
+                "SELECT plan_date, completed, drills_completed, quiz_version FROM study_plan_progress WHERE user_id=?", (user["id"],))}
         days = []
         cursor = start
         while cursor <= end:
             item = self.study_plan_item(cursor)
             item.update(self.study_day_details(cursor))
             saved = progress.get(item["date"])
-            item["completed"] = bool(saved["completed"]) if saved else False
-            item["drills_completed"] = saved["drills_completed"] if saved else 0
+            current = saved and saved["quiz_version"] == STUDY_QUIZ_VERSION
+            item["completed"] = bool(saved["completed"]) if current else False
+            item["drills_completed"] = saved["drills_completed"] if current else 0
             days.append(item)
             cursor += timedelta(days=1)
         self.json_response({"start": start.isoformat(), "end": end.isoformat(), "days": days,
@@ -900,15 +1105,15 @@ class Handler(BaseHTTPRequestHandler):
             raise ApiError(400, "Дата вне периода подготовки")
         completed = bool(data.get("completed"))
         with db() as conn:
-            saved = conn.execute("SELECT drills_completed FROM study_plan_progress WHERE user_id=? AND plan_date=?",
+            saved = conn.execute("SELECT drills_completed, quiz_version FROM study_plan_progress WHERE user_id=? AND plan_date=?",
                                  (user["id"], plan_date)).fetchone()
-            drills_completed = saved["drills_completed"] if saved else 0
+            drills_completed = saved["drills_completed"] if saved and saved["quiz_version"] == STUDY_QUIZ_VERSION else 0
             if completed and drills_completed != 7:
                 raise ApiError(400, "Сначала правильно ответьте на все три вопроса")
-            conn.execute("""INSERT INTO study_plan_progress(user_id,plan_date,completed,drills_completed,updated_at)
-                VALUES(?,?,?,?,?) ON CONFLICT(user_id,plan_date) DO UPDATE SET completed=excluded.completed,
-                drills_completed=excluded.drills_completed, updated_at=excluded.updated_at""",
-                (user["id"], plan_date, int(completed), drills_completed, now()))
+            conn.execute("""INSERT INTO study_plan_progress(user_id,plan_date,completed,drills_completed,quiz_version,updated_at)
+                VALUES(?,?,?,?,?,?) ON CONFLICT(user_id,plan_date) DO UPDATE SET completed=excluded.completed,
+                drills_completed=excluded.drills_completed, quiz_version=excluded.quiz_version, updated_at=excluded.updated_at""",
+                (user["id"], plan_date, int(completed), drills_completed, STUDY_QUIZ_VERSION, now()))
         self.json_response({"ok": True, "completed": completed, "drills_completed": drills_completed})
 
     def static(self, path):
