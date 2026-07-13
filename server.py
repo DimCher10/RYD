@@ -141,6 +141,35 @@ COURSE_MODULE_QUIZZES = {
     29: [("Как расшифровывается ViT?", ("vision transformer",), "ViT — Vision Transformer."), ("Какая модель связывает изображения и текст в общем пространстве?", ("clip",), "Это CLIP."), ("Как называется постепенное удаление шума при генерации изображения?", ("обратная диффузия", "denoising", "денойзинг"), "Диффузионная модель учится обращать процесс зашумления.")],
 }
 
+PRACTICUM_QUIZZES = {
+    1: [
+        ("Какая регуляризация способствует обнулению части весов: L1 или L2?", ("l1",), "L1 может давать разреженные веса и выполнять отбор признаков."),
+        ("Как называется автоматический подбор гиперпараметров с эффективным поиском?", ("optuna",), "Optuna автоматизирует поиск гиперпараметров."),
+        ("Какая библиотека объясняет предсказания через значения Шепли?", ("shap",), "SHAP используют для локальной и глобальной интерпретации."),
+        ("Как называется система для логирования параметров, метрик и моделей?", ("mlflow",), "MLflow помогает сравнивать и воспроизводить эксперименты."),
+        ("Как называется объединение предсказаний нескольких моделей метамоделью?", ("stacking", "стекинг", "стэкинг"), "В stacking метамодель учится на прогнозах базовых моделей."),
+        ("Какая техника исправляет дисбаланс увеличением числа объектов редкого класса?", ("oversampling", "оверсэмплинг"), "Oversampling увеличивает представленность редкого класса."),
+    ],
+    2: STUDY_QUIZZES["applied"],
+    3: [
+        ("Какой инструмент версионирует данные и ML-артефакты поверх Git?", ("dvc",), "DVC хранит версии данных и связывает их с кодом."),
+        ("Какой Python-фреймворк подходит для REST API модели?", ("fastapi", "fast api"), "FastAPI предоставляет типизацию и автоматическую документацию."),
+        ("Как называется файл инструкций сборки Docker-образа?", ("dockerfile",), "Dockerfile описывает слои и команду запуска образа."),
+        ("Какой HTTP-метод обычно получает ресурс без изменения состояния?", ("get",), "GET используют для чтения ресурса."),
+        ("Как называется изолированная среда зависимостей Python?", ("виртуальное окружение", "venv", "virtual environment"), "Виртуальное окружение изолирует версии библиотек."),
+        ("Как называется автоматическая проверка небольшого компонента программы?", ("юнит-тест", "unit test", "модульный тест"), "Unit test проверяет отдельную единицу поведения."),
+    ],
+    4: [
+        ("Как называется разделение пользователей между контрольной и экспериментальной группами?", ("a/b-тест", "ab тест", "a/b тест"), "A/B-тест сравнивает варианты на случайных группах."),
+        ("Как называется вероятность получить наблюдаемый результат при верной нулевой гипотезе?", ("p-value", "p value", "p-значение"), "Это p-value."),
+        ("Как называется изменение распределения входных признаков со временем?", ("data drift", "дрейф данных"), "Data drift отслеживают после запуска модели."),
+        ("Как называется обработка накопленной группы объектов по расписанию?", ("batch inference", "пакетный инференс", "batch"), "Batch inference не требует ответа в реальном времени."),
+        ("Как называется выдача прогноза сразу на пользовательский запрос?", ("online inference", "онлайн инференс", "online"), "Online inference требует контролировать задержку."),
+        ("Что нужно мониторить кроме технической ML-метрики?", ("бизнес-метрику", "бизнес метрику", "business metric"), "Качество модели должно быть связано с результатом продукта."),
+    ],
+    5: STUDY_QUIZZES["interview"],
+}
+
 
 def now():
     return datetime.now(timezone.utc).isoformat()
@@ -911,6 +940,8 @@ class Handler(BaseHTTPRequestHandler):
         }
         if day.year == 2026 and day.month == 7 and day.day in july_extra:
             return july_extra[day.day]
+        if day.year == 2027 and day.month in PRACTICUM_QUIZZES:
+            return PRACTICUM_QUIZZES[day.month]
         return STUDY_QUIZZES[self.study_quiz_key(day)]
 
     def study_day_details(self, day):
@@ -921,11 +952,11 @@ class Handler(BaseHTTPRequestHandler):
             (2026, 10): ("Темы 20–23", ["Графы", "CNN и transfer learning", "Кратчайшие пути", "Автоэнкодеры"]),
             (2026, 11): ("Темы 24–27", ["Переборы и оптимизация", "Тексты, BoW и TF-IDF", "Токенизация и эмбеддинги", "RNN и attention"]),
             (2026, 12): ("Темы 28–29", ["Self-attention и Transformer", "BERT и fine-tuning", "Encoder и decoder", "ViT, CLIP и мультимодальность"]),
-            (2027, 1): ("Закрепление ML и SQL", ["Линейные модели и регуляризация", "Деревья, Random Forest и boosting", "Метрики, валидация и leakage", "SQL: JOIN, CTE и оконные функции"]),
-            (2027, 2): ("LLM, embeddings и RAG", ["Sentence embeddings и semantic search", "Chunking и vector search", "Retrieval, reranking и RAG", "Оценка RAG и анализ ошибок"]),
-            (2027, 3): ("Главный проект", ["Постановка задачи и данные", "Baseline и валидация", "Эксперименты и анализ ошибок", "README и воспроизводимый запуск"]),
-            (2027, 4): ("Собеседования и резюме", ["ML-вопросы и статистика", "Алгоритмы и SQL", "ML-case и system design", "Рассказ о проекте и резюме"]),
-            (2027, 5): ("Симуляция отбора", ["Повтор классического ML", "Полные технические симуляции", "Разбор слабых мест", "Финальное легкое повторение"]),
+            (2027, 1): ("Закрепление ML · программа Яндекс Практикума", ["Бизнес-задача, preprocessing и feature engineering", "Регуляризация L1/L2, SVM и многоклассовая классификация", "Optuna, дисбаланс классов, feature importance и SHAP", "Ансамбли, stacking и трекинг экспериментов в MLflow"]),
+            (2027, 2): ("NLP и RAG · программа Яндекс Практикума", ["Классический NLP: BoW, TF-IDF, Word2Vec и FastText", "Transformer: генерация, суммаризация и инференс", "RAG: chunking, vector search, retrieval и дедупликация", "Оценка RAG, reranking, LoRA и ограничения мультимодальных моделей"]),
+            (2027, 3): ("Главный проект · инженерный контур", ["Git, ООП и структура Python-приложения", "Pipeline, версионирование данных и экспериментов с DVC/MLflow", "REST API модели на FastAPI и автоматические тесты", "Docker, воспроизводимый запуск и документация проекта"]),
+            (2027, 4): ("Собеседования и эксплуатация ML", ["A/B-тесты: гипотеза, метрики и статистическая значимость", "Мониторинг качества, data drift и продуктовые метрики", "ML system design: batch/online inference и отказоустойчивость", "Резюме, рассказ о проекте и полное mock interview"]),
+            (2027, 5): ("Симуляция отбора", ["Повтор ML, SQL и алгоритмов", "Полная симуляция: ML-case, код и SQL", "Разбор слабых мест и вопросы по production ML", "Финальное легкое повторение без новых технологий"]),
             (2027, 6): ("День отбора", ["Короткое повторение и спокойный режим"]),
         }
         stage, topics = month_plans[(day.year, day.month)]
@@ -1013,6 +1044,15 @@ class Handler(BaseHTTPRequestHandler):
                 27: "module10", 28: "module10", 29: "module10", 30: "module10", 31: "module10",
             }.get(day.day, resource_key)
         resources = resource_sets[resource_key]
+        if not module and date_type(2027, 1, 1) <= day <= date_type(2027, 5, 31):
+            practicum_resources = {
+                1: [("Программа ML-инженера Яндекс Практикума", "Источник тем закрепления: preprocessing, регуляризация, Optuna, SHAP и MLflow. Покупать второй курс не требуется.", "https://practicum.yandex.ru/machine-learning-start/"), ("Интерпретация моделей sklearn", "Permutation importance и анализ влияния признаков.", "https://scikit-learn.org/stable/modules/permutation_importance.html")],
+                2: [("Программа ML-инженера Яндекс Практикума", "Источник тем по классическому NLP, Transformer, RAG и мультимодальности.", "https://practicum.yandex.ru/machine-learning-start/"), ("Hugging Face Course", "Практика NLP, Transformer и готовых моделей.", "https://huggingface.co/learn/nlp-course/chapter1/1")],
+                3: [("Программа ML-инженера Яндекс Практикума", "Источник инженерных тем: Git, DVC, FastAPI, тестирование и Docker.", "https://practicum.yandex.ru/machine-learning-start/"), ("FastAPI Tutorial", "Создание, тестирование и документирование REST API.", "https://fastapi.tiangolo.com/tutorial/")],
+                4: [("Программа ML-инженера Яндекс Практикума", "Источник тем A/B-тестирования, мониторинга и внедрения моделей.", "https://practicum.yandex.ru/machine-learning-start/"), ("Managing ML Projects", "Production ML: постановка, запуск и мониторинг.", "https://developers.google.com/machine-learning/managing-ml-projects")],
+                5: [("Программа ML-инженера Яндекс Практикума", "Чек-лист практических навыков ML-инженера перед отбором.", "https://practicum.yandex.ru/machine-learning-start/"), ("NeetCode Roadmap", "Финальная практика алгоритмов по темам.", "https://neetcode.io/roadmap")],
+            }
+            resources = [practicum_resources[day.month][0], resources[0], practicum_resources[day.month][1]]
         if module and module[0] not in (9, 10):
             module_resources = {
                 11: [("Pandas User Guide", "Пропуски, группировки и исследование табличных данных.", "https://pandas.pydata.org/docs/user_guide/index.html"), ("Seaborn Tutorial", "Графики распределений, связей и категориальных признаков.", "https://seaborn.pydata.org/tutorial.html")],
