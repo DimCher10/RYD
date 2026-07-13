@@ -19,6 +19,81 @@ HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8000"))
 SESSION_DAYS = 30
 
+STUDY_QUIZZES = {
+    "foundation": [
+        ("Сколько столбцов будет у произведения матриц размеров 3x4 и 4x2?", ("2",), "Произведение имеет размер 3x2."),
+        ("Как называется максимальное число линейно независимых строк или столбцов матрицы?", ("ранг", "rank"), "Это ранг матрицы."),
+        ("Какое предварительное преобразование данных обязательно перед PCA?", ("центрирование", "центрировать", "вычесть среднее"), "PCA применяют к центрированным данным."),
+        ("Как называется точка, представляющая центр кластера в k-means?", ("центроид", "центр кластера"), "На шаге обновления k-means пересчитывает центроиды."),
+        ("Какую норму обычно минимизирует k-means: L1 или квадрат L2?", ("l2", "квадрат l2", "евклидову", "евклидово расстояние"), "Функция потерь k-means основана на квадратах евклидовых расстояний."),
+        ("Чему равен скалярный продукт ортогональных векторов?", ("0", "нулю"), "У перпендикулярных векторов скалярное произведение равно нулю."),
+        ("Как называется вектор из частных производных функции?", ("градиент",), "Градиент указывает направление быстрейшего роста функции."),
+        ("Куда направлен шаг градиентного спуска: по градиенту или против него?", ("против", "против градиента", "в минус градиент"), "Для минимизации двигаются в направлении минус градиента."),
+        ("Что чаще всего происходит при слишком большом learning rate?", ("расходимость", "модель расходится", "перескакивание минимума"), "Шаги могут перескакивать минимум, и оптимизация расходится."),
+        ("Как называется число lambda в равенстве Av = lambda*v?", ("собственное значение", "собственное число"), "Lambda является собственным значением матрицы A."),
+    ],
+    "validation": [
+        ("Как называется попадание информации из test в обучение?", ("утечка", "утечка данных", "data leakage", "leakage"), "Это утечка данных, делающая оценку завышенной."),
+        ("Какой split сохраняет доли классов?", ("stratified", "стратифицированный", "stratified split"), "Stratified split сохраняет пропорции классов."),
+        ("Какой split нужен, если строки одного пользователя не должны попасть в разные выборки?", ("group", "group split", "групповой"), "Используют group split по идентификатору пользователя."),
+        ("Какая метрика объединяет precision и recall гармоническим средним?", ("f1", "f1-score", "f1 score"), "Это F1-score."),
+        ("Что предпочтительнее при сильном дисбалансе и редком положительном классе: ROC-AUC или PR-AUC?", ("pr-auc", "pr auc", "prauc"), "PR-AUC лучше отражает качество на редком положительном классе."),
+        ("Как называется доля найденных положительных объектов среди всех реальных положительных?", ("recall", "полнота"), "Это recall, или полнота."),
+        ("Как называется доля верных положительных прогнозов среди всех положительных прогнозов?", ("precision", "точность"), "Это precision."),
+        ("Какую ошибку сильнее штрафует RMSE по сравнению с MAE?", ("большую", "большие ошибки", "выбросы"), "Из-за квадрата RMSE сильнее реагирует на крупные ошибки."),
+        ("На какой выборке окончательно оценивают выбранную модель?", ("test", "тестовой", "тестовая"), "Test используют один раз для итоговой оценки."),
+        ("Какой вид валидации нужен для данных, упорядоченных по времени?", ("time-series split", "time series split", "временной", "по времени"), "Будущее не должно попадать в обучение для прошлого."),
+    ],
+    "models": [
+        ("Как называется простая модель, с которой сравнивают улучшения?", ("baseline", "бейслайн"), "Сначала фиксируют baseline."),
+        ("Какой объект sklearn объединяет preprocessing и модель без утечки?", ("pipeline", "пайплайн"), "Pipeline применяет преобразования внутри каждого split."),
+        ("Какой метод PyTorch вычисляет градиенты?", ("backward", "backward()"), "Обычно вызывают loss.backward()."),
+        ("Какой метод оптимизатора обновляет веса?", ("step", "step()", "optimizer.step()"), "optimizer.step() применяет вычисленные градиенты."),
+        ("Что нужно вызвать перед новым backward, чтобы очистить прошлые градиенты?", ("zero_grad", "zero_grad()", "optimizer.zero_grad()"), "В PyTorch градиенты накапливаются, поэтому их обнуляют."),
+        ("Какой режим включает model.eval()?", ("оценки", "валидации", "инференса", "evaluation"), "eval переключает слои в режим оценки."),
+        ("Как называется подбор параметров модели по validation?", ("подбор гиперпараметров", "тюнинг", "hyperparameter tuning"), "Параметры выбирают по validation, не по test."),
+        ("Какая асимптотика у классического бинарного поиска?", ("o(log n)", "log n", "логарифмическая"), "На каждом шаге область поиска делится пополам."),
+        ("Как называется сохранение промежуточных ответов в динамическом программировании?", ("мемоизация", "memoization"), "Мемоизация не позволяет пересчитывать одинаковые состояния."),
+        ("Какой алгоритм обхода графа использует очередь: BFS или DFS?", ("bfs", "поиск в ширину"), "BFS обрабатывает вершины по слоям через очередь."),
+    ],
+    "nlp": [
+        ("Как называется разбиение текста на элементы словаря модели?", ("токенизация", "tokenization"), "Токенизация преобразует текст в последовательность токенов."),
+        ("Какая маска скрывает padding от attention?", ("attention mask", "attention_mask", "маска внимания"), "Attention mask отмечает реальные токены и padding."),
+        ("Какая классическая модель признаков взвешивает слова по частоте в документе и корпусе?", ("tf-idf", "tfidf"), "TF-IDF является сильным текстовым baseline."),
+        ("Как называется сходство, основанное на угле между эмбеддингами?", ("cosine similarity", "косинусное сходство", "косинусная близость"), "Cosine similarity сравнивает направления векторов."),
+        ("Какие три матрицы используются в self-attention?", ("q k v", "q, k, v", "query key value", "query, key, value"), "Self-attention строится на Query, Key и Value."),
+        ("Какой блок Transformer обычно двунаправленно кодирует вход: encoder или decoder?", ("encoder", "энкодер"), "Encoder видит контекст с обеих сторон без causal mask."),
+        ("К какому типу моделей относится BERT: encoder или decoder?", ("encoder", "энкодер", "encoder-like"), "BERT является encoder-like моделью."),
+        ("Как называется дообучение всех весов готовой модели?", ("fine-tuning", "fine tuning", "файнтюнинг"), "При fine-tuning обновляются веса предобученной модели."),
+        ("Что делает causal mask в decoder?", ("скрывает будущие токены", "запрещает смотреть в будущее", "маскирует будущие токены"), "Токен не должен получать информацию из будущих позиций."),
+        ("Какой слой переводит id токена в плотный вектор?", ("embedding", "эмбеддинг", "embedding layer"), "Embedding layer сопоставляет индексу обучаемый вектор."),
+    ],
+    "applied": [
+        ("Как называется поиск ближайших документов по эмбеддингу запроса?", ("semantic search", "семантический поиск", "vector search", "векторный поиск"), "Это semantic/vector search."),
+        ("Какая retrieval-метрика показывает, найден ли релевантный документ в первых k результатах?", ("recall@k", "recall at k"), "Recall@k измеряет полноту выдачи до позиции k."),
+        ("Как называется повторная сортировка кандидатов более точной моделью?", ("reranking", "реранжирование"), "Reranker уточняет порядок документов после retrieval."),
+        ("Как называется разбиение документа на фрагменты для RAG?", ("chunking", "чанкинг"), "Chunking определяет единицы индексирования и retrieval."),
+        ("Как называется изменение распределения входных данных со временем?", ("data drift", "дрейф данных"), "Data drift нужно отслеживать после запуска модели."),
+        ("Как называется компромисс между недообучением и переобучением?", ("bias-variance", "bias variance", "смещение-дисперсия"), "Это bias-variance trade-off."),
+        ("Что должно быть зафиксировано для воспроизводимого случайного эксперимента?", ("seed", "random seed", "случайное зерно"), "Фиксированный seed помогает повторить split и обучение."),
+        ("Как называется анализ примеров, на которых модель ошиблась?", ("error analysis", "анализ ошибок"), "Error analysis определяет направления следующих экспериментов."),
+        ("Как называется самый простой рабочий вариант решения?", ("baseline", "бейслайн"), "Baseline показывает, дают ли сложные эксперименты улучшение."),
+        ("Какой SQL-оператор вычисляет значение по условию?", ("case when", "case"), "CASE WHEN реализует условную логику в SQL."),
+    ],
+    "interview": [
+        ("Как называется метрика, непосредственно связанная с целью продукта?", ("бизнес-метрика", "business metric"), "Техническую метрику выбирают с учетом бизнес-метрики."),
+        ("Как называется запуск модели на группе объектов по расписанию?", ("batch inference", "batch", "пакетный инференс"), "Batch inference обрабатывает накопившуюся партию."),
+        ("Как называется выдача прогноза сразу по запросу пользователя?", ("online inference", "online", "онлайн инференс"), "Online inference требует низкой задержки."),
+        ("Какой файл обычно описывает запуск и устройство проекта на GitHub?", ("readme", "readme.md"), "README должен содержать постановку, запуск и результаты."),
+        ("Как называется проверка кандидата на реальном бизнес-сценарии без готовой формулы?", ("ml case", "ml-case", "ml кейс"), "ML-case проверяет постановку задачи и выбор решения."),
+        ("Что нельзя использовать для выбора лучшего эксперимента: validation или test?", ("test", "тест", "тестовую выборку"), "Иначе итоговая оценка становится смещенной."),
+        ("Как называется наблюдение за качеством модели после запуска?", ("мониторинг", "monitoring"), "Мониторинг отслеживает качество, задержки и drift."),
+        ("Как называется статистически значимое изменение распределения признаков?", ("data drift", "дрейф данных"), "Data drift может ухудшить модель даже без изменения кода."),
+        ("Как называется ограниченная версия продукта для проверки гипотезы?", ("mvp", "minimum viable product"), "MVP позволяет проверить ценность до сложной реализации."),
+        ("Что нужно назвать после результата проекта: только успехи или также ограничения?", ("ограничения", "также ограничения", "limitations"), "Честный рассказ включает ошибки и ограничения решения."),
+    ],
+}
+
 
 def now():
     return datetime.now(timezone.utc).isoformat()
@@ -259,6 +334,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.create_task()
             if path == "/api/notes":
                 return self.create_note()
+            if path == "/api/study-plan/check":
+                return self.check_plan_answer()
             raise ApiError(404, "Маршрут не найден")
         except ApiError as error:
             self.json_response({"error": error.message}, error.status)
@@ -688,10 +765,57 @@ class Handler(BaseHTTPRequestHandler):
                 ("Расскажи о проекте за 5 минут, затем за 90 секунд.", "Ответь на пять неудобных вопросов об ограничениях.", "Рассказ конкретен: данные, baseline, эксперимент, результат."),
                 ("Повтори только три слабые темы, не открывая новых.", "Кратко объясни каждую тему перед сном.", "Подготовка завершена вовремя, сохранен нормальный режим сна."),
             ]
-        drill_names = ("Практика без подсказок", "Объяснение вслух", "Контроль качества")
+        quiz_key = self.study_quiz_key(day)
+        quiz_bank = STUDY_QUIZZES[quiz_key]
+        quiz_start = day.toordinal() % len(quiz_bank)
+        quiz_items = [quiz_bank[(quiz_start + offset) % len(quiz_bank)] for offset in range(3)]
+        drill_names = ("Быстрый вопрос", "Проверка понимания", "Контрольный вопрос")
         return {"date": day.isoformat(), "phase": phase, "title": tasks[weekday], "weekday": weekday,
-                "drills": [{"id": index, "name": drill_names[index], "text": text}
-                           for index, text in enumerate(drills[weekday])]}
+                "drills": [{"id": index, "name": drill_names[index], "text": item[0]}
+                           for index, item in enumerate(quiz_items)]}
+
+    def study_quiz_key(self, day):
+        if day <= date_type(2026, 7, 31):
+            return "foundation"
+        if day <= date_type(2026, 8, 31):
+            return "validation"
+        if day <= date_type(2026, 10, 31):
+            return "models"
+        if day <= date_type(2026, 12, 31):
+            return "nlp"
+        if day <= date_type(2027, 2, 28):
+            return "applied"
+        return "interview"
+
+    def check_plan_answer(self):
+        user, data = self.user(), self.body()
+        try:
+            day = date_type.fromisoformat(str(data.get("date", "")))
+            drill_id = int(data.get("drill_id"))
+        except (TypeError, ValueError):
+            raise ApiError(400, "Некорректный вопрос")
+        today = datetime.now(timezone.utc).date()
+        if day < today or day > date_type(2027, 6, 1) or drill_id not in range(3):
+            raise ApiError(400, "Вопрос недоступен")
+        answer = " ".join(str(data.get("answer", "")).strip().lower().replace("ё", "е").split())
+        if not answer or len(answer) > 200:
+            raise ApiError(400, "Введите короткий ответ")
+        quiz_bank = STUDY_QUIZZES[self.study_quiz_key(day)]
+        question = quiz_bank[(day.toordinal() % len(quiz_bank) + drill_id) % len(quiz_bank)]
+        accepted = {" ".join(value.lower().replace("ё", "е").split()) for value in question[1]}
+        correct = answer in accepted
+        with db() as conn:
+            saved = conn.execute("SELECT completed, drills_completed FROM study_plan_progress WHERE user_id=? AND plan_date=?",
+                                 (user["id"], day.isoformat())).fetchone()
+            completed = bool(saved["completed"]) if saved else False
+            mask = saved["drills_completed"] if saved else 0
+            if correct:
+                mask |= 1 << drill_id
+            conn.execute("""INSERT INTO study_plan_progress(user_id,plan_date,completed,drills_completed,updated_at)
+                VALUES(?,?,?,?,?) ON CONFLICT(user_id,plan_date) DO UPDATE SET drills_completed=excluded.drills_completed,
+                updated_at=excluded.updated_at""", (user["id"], day.isoformat(), int(completed), mask, now()))
+        self.json_response({"correct": correct, "drills_completed": mask,
+                            "explanation": question[2] if correct else "Ответ не совпал. Проверь термин или вычисление и попробуй еще раз."})
 
     def study_plan(self):
         user = self.user()
@@ -720,11 +844,13 @@ class Handler(BaseHTTPRequestHandler):
             raise ApiError(400, "Некорректная дата")
         if day < datetime.now(timezone.utc).date() or day > date_type(2027, 6, 1):
             raise ApiError(400, "Дата вне периода подготовки")
-        drills_completed = max(0, min(int(data.get("drills_completed") or 0), 7))
         completed = bool(data.get("completed"))
-        if completed and drills_completed != 7:
-            raise ApiError(400, "Сначала пройдите все три тренажера")
         with db() as conn:
+            saved = conn.execute("SELECT drills_completed FROM study_plan_progress WHERE user_id=? AND plan_date=?",
+                                 (user["id"], plan_date)).fetchone()
+            drills_completed = saved["drills_completed"] if saved else 0
+            if completed and drills_completed != 7:
+                raise ApiError(400, "Сначала правильно ответьте на все три вопроса")
             conn.execute("""INSERT INTO study_plan_progress(user_id,plan_date,completed,drills_completed,updated_at)
                 VALUES(?,?,?,?,?) ON CONFLICT(user_id,plan_date) DO UPDATE SET completed=excluded.completed,
                 drills_completed=excluded.drills_completed, updated_at=excluded.updated_at""",
