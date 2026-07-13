@@ -19,6 +19,8 @@ HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8000"))
 SESSION_DAYS = 30
 STUDY_QUIZ_VERSION = 2
+STUDY_PLAN_START = date_type(2026, 7, 13)
+STUDY_PLAN_END = date_type(2027, 6, 1)
 
 STUDY_QUIZZES = {
     "module9": [
@@ -1089,8 +1091,7 @@ class Handler(BaseHTTPRequestHandler):
             drill_id = int(data.get("drill_id"))
         except (TypeError, ValueError):
             raise ApiError(400, "Некорректный вопрос")
-        today = datetime.now(timezone.utc).date()
-        if day < today or day > date_type(2027, 6, 1) or drill_id not in range(3):
+        if day < STUDY_PLAN_START or day > STUDY_PLAN_END or drill_id not in range(3):
             raise ApiError(400, "Вопрос недоступен")
         answer = " ".join(str(data.get("answer", "")).strip().lower().replace("ё", "е").split())
         if not answer or len(answer) > 200:
@@ -1116,8 +1117,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def study_plan(self):
         user = self.user()
-        start = datetime.now(timezone.utc).date()
-        end = date_type(2027, 6, 1)
+        start = STUDY_PLAN_START
+        end = STUDY_PLAN_END
         with db() as conn:
             progress = {r["plan_date"]: r for r in conn.execute(
                 "SELECT plan_date, completed, drills_completed, quiz_version FROM study_plan_progress WHERE user_id=?", (user["id"],))}
@@ -1141,7 +1142,7 @@ class Handler(BaseHTTPRequestHandler):
             day = date_type.fromisoformat(plan_date)
         except ValueError:
             raise ApiError(400, "Некорректная дата")
-        if day < datetime.now(timezone.utc).date() or day > date_type(2027, 6, 1):
+        if day < STUDY_PLAN_START or day > STUDY_PLAN_END:
             raise ApiError(400, "Дата вне периода подготовки")
         completed = bool(data.get("completed"))
         with db() as conn:
