@@ -3,6 +3,7 @@ import hmac
 import json
 import mimetypes
 import os
+import re
 import secrets
 import sqlite3
 from datetime import date as date_type, datetime, timedelta, timezone
@@ -416,6 +417,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.create_note()
             if path == "/api/study-plan/check":
                 return self.check_plan_answer()
+            if path == "/api/study-plan/answer":
+                return self.reveal_plan_answer()
             raise ApiError(404, "Маршрут не найден")
         except ApiError as error:
             self.json_response({"error": error.message}, error.status)
@@ -1093,13 +1096,15 @@ class Handler(BaseHTTPRequestHandler):
             raise ApiError(400, "Некорректный вопрос")
         if day < STUDY_PLAN_START or day > STUDY_PLAN_END or drill_id not in range(3):
             raise ApiError(400, "Вопрос недоступен")
-        answer = " ".join(str(data.get("answer", "")).strip().lower().replace("ё", "е").split())
+        answer = self.normalize_plan_answer(data.get("answer", ""))
         if not answer or len(answer) > 200:
             raise ApiError(400, "Введите короткий ответ")
         quiz_bank = self.quiz_bank(day)
         question = quiz_bank[(day.toordinal() % len(quiz_bank) + drill_id) % len(quiz_bank)]
-        accepted = {" ".join(value.lower().replace("ё", "е").split()) for value in question[1]}
-        correct = answer in accepted
+        accepted = {self.normalize_plan_answer(value) for value in question[1]}
+        answer_tokens = set(answer.split())
+        correct = any(value == answer or set(value.split()) <= answer_tokens or (len(value) >= 4 and value in answer)
+                      for value in accepted)
         with db() as conn:
             saved = conn.execute("SELECT completed, drills_completed, quiz_version FROM study_plan_progress WHERE user_id=? AND plan_date=?",
                                  (user["id"], day.isoformat())).fetchone()
@@ -1114,6 +1119,24 @@ class Handler(BaseHTTPRequestHandler):
                 (user["id"], day.isoformat(), int(completed), mask, STUDY_QUIZ_VERSION, now()))
         self.json_response({"correct": correct, "drills_completed": mask,
                             "explanation": question[2] if correct else "Ответ не совпал. Проверь термин или вычисление и попробуй еще раз."})
+
+    def normalize_plan_answer(self, value):
+        value = str(value).strip().lower().replace("ё", "е")
+        return " ".join(re.sub(r"[^a-zа-я0-9@^]+", " ", value).split())
+
+    def reveal_plan_answer(self):
+        self.user()
+        data = self.body()
+        try:
+            day = date_type.fromisoformat(str(data.get("date", "")))
+            drill_id = int(data.get("drill_id"))
+        except (TypeError, ValueError):
+            raise ApiError(400, "Некорректный вопрос")
+        if day < STUDY_PLAN_START or day > STUDY_PLAN_END or drill_id not in range(3):
+            raise ApiError(400, "Вопрос недоступен")
+        quiz_bank = self.quiz_bank(day)
+        question = quiz_bank[(day.toordinal() % len(quiz_bank) + drill_id) % len(quiz_bank)]
+        self.json_response({"answer": question[1][0], "explanation": question[2]})
 
     def study_plan(self):
         user = self.user()
