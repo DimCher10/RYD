@@ -5,7 +5,7 @@ import mimetypes
 import os
 import secrets
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import date as date_type, datetime, timedelta, timezone
 from http import cookies
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -88,6 +88,13 @@ def init_db():
             );
             CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);
             CREATE INDEX IF NOT EXISTS idx_tasks_completed ON tasks(user_id, completed_at);
+            CREATE TABLE IF NOT EXISTS study_plan_progress (
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                plan_date TEXT NOT NULL,
+                completed INTEGER NOT NULL DEFAULT 0,
+                updated_at TEXT NOT NULL,
+                PRIMARY KEY (user_id, plan_date)
+            );
             """
         )
         columns = {row["name"] for row in conn.execute("PRAGMA table_info(tasks)")}
@@ -220,6 +227,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.list_tasks()
             if path == "/api/stats":
                 return self.stats()
+            if path == "/api/study-plan":
+                return self.study_plan()
             if path.startswith("/api/"):
                 raise ApiError(404, "Маршрут не найден")
             return self.static(path)
@@ -260,6 +269,8 @@ class Handler(BaseHTTPRequestHandler):
             parts = self.route().split("/")
             if len(parts) == 4 and parts[1:3] == ["api", "tasks"]:
                 return self.update_task(int(parts[3]))
+            if len(parts) == 4 and parts[1:3] == ["api", "study-plan"]:
+                return self.update_plan_day(parts[3])
             raise ApiError(404, "Маршрут не найден")
         except ValueError:
             self.json_response({"error": "Некорректный идентификатор"}, 400)
@@ -530,6 +541,119 @@ class Handler(BaseHTTPRequestHandler):
                             "month_solved": month_solved, "day_solved": day_solved,
                             "lifetime_minutes": lifetime["spent_minutes"] or 0,
                             "lifetime_solved": lifetime["solved_count"] or 0})
+
+    def study_plan_item(self, day):
+        weekday = day.weekday()
+        if day <= date_type(2026, 7, 31):
+            phase = "Темы 9–10 · математика и фундамент"
+            tasks = [
+                "Повторить линейную алгебру: матричное умножение, ранг и собственные векторы",
+                "Практика: реализовать k-means или градиентный спуск через NumPy",
+                "Закрыть текущий семинар и самостоятельно решить домашнюю работу",
+                "Решить 5 коротких задач по линейной алгебре",
+                "Алгоритмы: массивы, строки, словари и оценка сложности",
+                "Мини-проект: масштабирование, PCA и k-means на небольшом датасете",
+                "Недельный тест по темам 3–10 и разбор ошибок",
+            ]
+        elif day <= date_type(2026, 8, 31):
+            phase = "Темы 11–15 · EDA, метрики и валидация"
+            tasks = [
+                "Семинар текущего модуля и конспект на 1–2 страницы",
+                "Домашняя работа без подсказок, затем выписать ошибки",
+                "Практика EDA: пропуски, выбросы, распределения и корреляции",
+                "Алгоритмы: 2 задачи без подсказок",
+                "SQL: SELECT, WHERE, GROUP BY и JOIN",
+                "Сравнить метрики на несбалансированных данных",
+                "Повтор недели: leakage, train/validation/test и cross-validation",
+            ]
+        elif day <= date_type(2026, 10, 31):
+            phase = "Темы 16–23 · алгоритмы, модели и нейросети"
+            tasks = [
+                "Семинар курса и карточки с ключевыми определениями",
+                "Домашняя работа: сначала собственное решение, потом разбор",
+                "Решить 2 алгоритмические задачи и оценить сложность",
+                "SQL: CTE, подзапросы или оконные функции",
+                "Практика ML: baseline, Pipeline и таблица экспериментов",
+                "PyTorch: написать или улучшить training loop",
+                "Повторить неделю и объяснить одну тему вслух за 5 минут",
+            ]
+        elif day <= date_type(2026, 12, 31):
+            phase = "Темы 24–29 · NLP, attention и трансформеры"
+            tasks = [
+                "Семинар: токенизация, embeddings или self-attention",
+                "Домашняя работа и повторная реализация через 2–3 дня",
+                "Собрать TF-IDF baseline для текстовой классификации",
+                "Решить 2 задачи по графам, динамике или оптимизации",
+                "SQL-сессия: 3 задачи с агрегациями и JOIN",
+                "Практика: сравнить baseline с нейросетевой моделью",
+                "Устно объяснить Transformer, BERT и маски без конспекта",
+            ]
+        elif day <= date_type(2027, 2, 28):
+            phase = "Закрепление · классический ML, SQL и LLM"
+            tasks = [
+                "Повторить классический ML и ответить на 10 вопросов собеседования",
+                "Решить 3 алгоритмические задачи",
+                "SQL: оконные функции, даты и CASE WHEN",
+                "Разобрать leakage, bias-variance и выбор метрики",
+                "RAG: проверить retrieval на контрольном наборе вопросов",
+                "Работа над главным проектом: эксперимент или анализ ошибок",
+                "Недельный mock interview и список пробелов",
+            ]
+        elif day <= date_type(2027, 4, 30):
+            phase = "Собеседования · проект, ML-case и резюме"
+            tasks = [
+                "ML-интервью: метрики, валидация и вопросы по проекту",
+                "Алгоритмическая задача с таймером 35 минут",
+                "SQL-сессия из 3 задач",
+                "ML-case: постановка задачи, baseline и бизнес-метрика",
+                "Обновить README и воспроизводимый запуск проекта",
+                "Mock interview: рассказ о себе и главном проекте",
+                "Разобрать ошибки недели и повторить слабые темы",
+            ]
+        else:
+            phase = "Финальная подготовка · симуляции отбора"
+            tasks = [
+                "Повторить классический ML и статистику",
+                "Алгоритмическая задача в формате отбора",
+                "SQL-сессия и проверка типичных ошибок",
+                "PyTorch или NLP: 30 минут вопросов и практики",
+                "Провести полный ML-case",
+                "Повторить карточки по главному проекту",
+                "Легкое повторение, сон и план следующей недели",
+            ]
+        return {"date": day.isoformat(), "phase": phase, "title": tasks[weekday], "weekday": weekday}
+
+    def study_plan(self):
+        user = self.user()
+        start = datetime.now(timezone.utc).date()
+        end = date_type(2027, 6, 1)
+        with db() as conn:
+            completed = {r["plan_date"]: bool(r["completed"]) for r in conn.execute(
+                "SELECT plan_date, completed FROM study_plan_progress WHERE user_id=?", (user["id"],))}
+        days = []
+        cursor = start
+        while cursor <= end:
+            item = self.study_plan_item(cursor)
+            item["completed"] = completed.get(item["date"], False)
+            days.append(item)
+            cursor += timedelta(days=1)
+        self.json_response({"start": start.isoformat(), "end": end.isoformat(), "days": days,
+                            "completed": sum(item["completed"] for item in days)})
+
+    def update_plan_day(self, plan_date):
+        user, data = self.user(), self.body()
+        try:
+            day = date_type.fromisoformat(plan_date)
+        except ValueError:
+            raise ApiError(400, "Некорректная дата")
+        if day < datetime.now(timezone.utc).date() or day > date_type(2027, 6, 1):
+            raise ApiError(400, "Дата вне периода подготовки")
+        completed = bool(data.get("completed"))
+        with db() as conn:
+            conn.execute("""INSERT INTO study_plan_progress(user_id,plan_date,completed,updated_at)
+                VALUES(?,?,?,?) ON CONFLICT(user_id,plan_date) DO UPDATE SET completed=excluded.completed, updated_at=excluded.updated_at""",
+                (user["id"], plan_date, int(completed), now()))
+        self.json_response({"ok": True, "completed": completed})
 
     def static(self, path):
         relative = "index.html" if path == "/" else path.lstrip("/")
